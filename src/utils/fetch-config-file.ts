@@ -1,13 +1,13 @@
 import * as fs from 'fs';
+import errorMessages from './errors';
 
 export async function readJsonFile(filePath: string) {
     try {
         const data = await fs.promises.readFile(filePath, 'utf-8');
-        console.log(data);
         const jsonData = JSON.parse(data);
         return jsonData;
     } catch (error) {
-        console.error(`Error reading JSON file: ${error}`);
+        console.error();
         throw error;
     }
 }

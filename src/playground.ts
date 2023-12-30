@@ -1,5 +1,6 @@
 import { Prolog } from ".";
 
-Prolog.log("Sky rim lowkey sucks");
-Prolog.warn("Sky rim lowkey sucks");
-Prolog.error("Sky rim lowkey sucks");
+const logger = new Prolog();
+
+logger.log("Sky rim lowkey sucks");
+logger.error("Sky rim lowkey sucks");

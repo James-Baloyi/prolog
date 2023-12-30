@@ -1,6 +1,7 @@
 const axios = require('axios');
 import { AxiosResponse } from "axios";
 import { readJsonFile } from "./utils/fetch-config-file";
+import errorMessages from "./utils/errors";
 
 const alphabetArray:string[] = [
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", 
@@ -12,13 +13,6 @@ const alphabetArray:string[] = [
 const numbersArray:string[] = [
     "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
 ];
-  
-
-const json = {
-    apiKey: "1234",
-    environment: "development",
-    project: "prolog-playground"
-}
 
 async function fetchConfigJsonFile() {
     readJsonFile('../prolog.config.json')
@@ -40,44 +34,64 @@ async function validateKey():Promise<boolean> {
     if(isKeyValid === true){
         return isKeyValid;
     }else{
-        throw new Error("The API key provided is invalid, please get a new API key.\nAdditional logging: " + JSON.stringify(configObject));
+        throw new Error(errorMessages.INVALID_API_KEY);
     }
 }
 
-
 export class Prolog {
-    static async log(message: string) {
+    constructor(){
+        this.log = this.log.bind(this);
+        this.error = this.error.bind(this);
+        this.warn = this.warn.bind(this);
+    }
+
+
+    public async log(message: string) {
         const isKeyValid = await validateKey();
         if(isKeyValid){
             console.log(`[LOG] ${message}`);
         }else{
-            throw new Error("Please check your config file and try again");
+            throw new Error(errorMessages.INVALID_API_KEY);
         }            
     }
 
     private static async generateLogToken():Promise<string>{
-        const token = '';
+        let token = '';
+        for(let i = 0; i < 10; i++){
+            const randomIndex = Math.floor(Math.random() * alphabetArray.length);
+            token += alphabetArray[randomIndex];
+        }
+        for(let i = 0; i < 10; i++){
+            const randomIndex = Math.floor(Math.random() * numbersArray.length);
+            token += numbersArray[randomIndex];
+        }
         return token;
     }
 
-    private static async submitLogToServer(message: string, token: string):Promise<AxiosResponse>{
-        const log_token = await Prolog.generateLogToken()
-        const res = await axios.get(`https://log-handler.com/api/v1/log-handler?log=${message}&log_token=${log_token}&type=warn`);
+    private static async submitLogToServer(message: string, token: string, level: string):Promise<AxiosResponse>{
+        const date = new Date();
+        const logDate = `${date.getDate()} - ${date.getMonth()} - ${date.getFullYear()}`;
+        const log = {
+            message: message,
+            token: token,
+            date: logDate,
+            level: level
+        }
+        const res = await axios.post(`https://prlg-jnb-1.akamai.com/api/v1/log-handler`, log);
         return res;
     }
 
-    static async warn(message: string) {
+     public async warn(message: string) {
         const isKeyValid = await validateKey();
         if(isKeyValid){
             const token = await Prolog.generateLogToken();
-            this.submitLogToServer(message, token);
+            Prolog.submitLogToServer(message, token, 'warning');
         }else{
-            throw new Error("Please check your config file and try again");
+            throw new Error(errorMessages.INVALID_API_KEY);
         }
     }    
 
-    static error(message: string) {
+    public async error(message: string) {
             console.error(`[ERROR] ${message}`);
-
     }
 }

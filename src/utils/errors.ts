@@ -1,3 +1,4 @@
+
 const errorMessages = {
     NO_CONFIG_FILE: "No config file found, please go to prolog.io to download a new config file and try again",
     EMPTY_CONFIG_FILE: "Config file is empty, please go to prolog.io to download a new config file and try again",
