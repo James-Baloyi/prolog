@@ -14,7 +14,6 @@ app.post('/validate-key', (req: { body: { configObject: ConfigureProlog }; }, re
     }
 
     firebase.database().ref('prolog').once('value').then((snapshot: { val: () => any; }) => {
-        console.log(snapshot.val());
     }).catch((error: string) => {    throw new Error("Error: " + error);    });
 
 
